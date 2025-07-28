@@ -18,7 +18,7 @@ calculate_volume <- function(diameter, height) {
 
 ## FUNCTION: summarise iris dataset
 calc_iris_mean <- function(data) {
-    data() |>  
+    data |>  
         summarise(
             #across selects columns and then applies a transformation to them 
             across( 
@@ -44,4 +44,26 @@ calc_iris_mean <- function(data) {
             .by_group = TRUE
         ) |> 
         ungroup()
+}
+
+## FUNCTION: summarise mean of numeric variables in a dataset 
+calc_numeric_mean <- function(data, group) {
+    data |>  
+        summarise(
+            across( 
+                where(is.numeric), \(x) mean(x, na.rm = TRUE)
+            ), 
+            .by = {{ group }}
+        ) |> 
+        pivot_longer( 
+            cols      = where(is.numeric), 
+            names_to  = "measure", 
+            values_to = "mean"
+        ) |> 
+        group_by(measure) |> 
+        arrange( 
+            desc(mean), 
+            .by_group = TRUE
+        ) |> 
+        ungroup()  
 }

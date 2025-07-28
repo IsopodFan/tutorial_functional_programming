@@ -12,7 +12,7 @@
 library(tidyverse)
 
 ## Functions
-source("...")
+source("R/utilities.R")
 
 # 2. Load data ------------------------------------------------------------
 
@@ -50,18 +50,94 @@ iris_tbl |>
     ungroup()
     #now we can add this as a function to the utilities page
 
+calc_iris_mean(iris_tbl) 
+
 # 4. General function -----------------------------------------------------
-calc_iris_mean(iris_tbl)
+    #make a new version of the calc_iris_mean function that could apply to other data sets 
 
 ## https://ggplot2.tidyverse.org/reference/tidyeval.html
 
+## Function 
+calc_numeric_mean <- function(data, group) {
+    data |>  
+        summarise(
+            across( 
+                where(is.numeric), mean
+            ), 
+            .by = group
+        ) |> 
+        pivot_longer( 
+            cols      = where(is.numeric), 
+            names_to  = "measure", 
+            values_to = "mean"
+        ) |> 
+        group_by(measure) |> 
+        arrange( 
+            desc(mean), 
+            .by_group = TRUE
+        ) |> 
+        ungroup()  
+}
+
+
 ## Apply to other datasets
+airquality |>  
+    summarise(
+        across( 
+            where(is.numeric), mean
+        ), 
+        .by = Month
+    ) |> 
+    pivot_longer( 
+        cols      = where(is.numeric), 
+        names_to  = "measure", 
+        values_to = "mean"
+    ) |> 
+    group_by(measure) |> 
+    arrange( 
+        desc(mean), 
+        .by_group = TRUE
+    ) |> 
+    ungroup()
 
+calc_numeric_mean( 
+    data  = airquality, 
+    group = Month
+)
+#the above throws an error because of tidyverse evals 
+    #basically, within the first portion of the function 
+    #the .by  = group is not looking for the group specified in the function input
+    #instead its looking for a group within the data table 
+    #you can fix this with curly braces, which tells R to look in the function inputs first
 
+    #also in this iteration we clean NAs out with an anonymous function 
+        #anonymous function is a function with no name used once 
+        #it is introducts with "\(variable name)"
 
+calc_numeric_mean <- function(data, group) {
+    data |>  
+        summarise(
+            across( 
+                where(is.numeric), \(x) mean(x, na.rm = TRUE)
+            ), 
+            .by = {{ group }}
+        ) |> 
+        pivot_longer( 
+            cols      = where(is.numeric), 
+            names_to  = "measure", 
+            values_to = "mean"
+        ) |> 
+        group_by(measure) |> 
+        arrange( 
+            desc(mean), 
+            .by_group = TRUE
+        ) |> 
+        ungroup()  
+}
 
-
-
-
+calc_numeric_mean( 
+    data  = airquality, 
+    group = Month
+) |> print(n = 50)
 
 
