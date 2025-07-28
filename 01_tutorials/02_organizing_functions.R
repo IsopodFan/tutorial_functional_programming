@@ -8,7 +8,15 @@
 
 # 1. Load packages --------------------------------------------------------
 
-library(tidyverse)
+## Load packages
+library(tidyverse) 
+
+#it is often best practice to keep your functions and related code in a separate Rscript 
+    #you can then recall those functions with the source command 
+    #this keeps things organized
+
+## Load functions 
+source("R/utilities.R")
 
 # 2. Load data ------------------------------------------------------------
 
@@ -21,3 +29,22 @@ trees_tbl <- as_tibble(trees) |>
 ## -> Convert girth from inches to centimeters
 ## -> Convert height from feet to meters
 ## -> Calculate volume in m3
+
+trees_tbl |> 
+    mutate( 
+        Girth_cm  = convert_into_cm(Girth), 
+        Height_m  = convert_into_m(Height), 
+        Volume_m3 = calculate_volume(Girth_cm, Height_m)
+    )
+
+
+
+
+
+
+
+
+
+
+
+
